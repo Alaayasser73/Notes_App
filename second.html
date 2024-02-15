@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Note Taking App</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+
+        .container {
+            max-width: 500px;
+            margin: 50px auto;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        input[type="text"],
+        textarea {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+
+        button {
+            padding: 10px 20px;
+            background-color: #4caf50;
+            color: #fff;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #45a049;
+        }
+
+        .notes {
+            margin-top: 30px;
+        }
+
+        .note {
+            background-color: #f9f9f9;
+            border: 1px solid #ddd;
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .note:last-child {
+            margin-bottom: 0;
+        }
+
+        .note p {
+            margin: 0;
+        }
+
+        .note .delete-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background-color: #f44336;
+            color: #fff;
+            border: none;
+            border-radius: 50%;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            transition: background-color 0.3s ease;
+        }
+
+        .note .delete-btn:hover {
+            background-color: #d32f2f;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <h2>Note Taking App</h2>
+        <div id="login-container">
+            <input type="text" id="username" placeholder="Username">
+            <input type="password" id="password" placeholder="Password">
+            <button onclick="login()">Login</button>
+        </div>
+        <div id="notes-container" style="display: none;">
+            <textarea id="note" placeholder="Write your note here"></textarea>
+            <button onclick="addNote()">Add Note</button>
+            <button class="logout-btn" onclick="logout()">Logout</button>
+            <div class="notes" id="user-notes"></div>
+        </div>
+    </div>
+
+    <script>
+        // Check if user is authenticated
+        function checkAuth() {
+            return localStorage.getItem('authenticated');
+        }
+
+        // Login function
+        function login() {
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            // Example: simple authentication with hard-coded username and password
+            if (username === 'user' && password === 'pass') {
+                localStorage.setItem('authenticated', true);
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('notes-container').style.display = 'block';
+                loadNotes();
+            } else {
+                alert('Invalid username or password');
+            }
+        }
+
+        // Logout function
+        function logout() {
+            localStorage.removeItem('authenticated');
+            location.reload();
+        }
+
+        // Add Note function
+        function addNote() {
+            const noteText = document.getElementById('note').value;
+            if (noteText.trim() === '') {
+                alert('Note cannot be empty');
+                return;
+            }
+            const note = {
+                text: noteText,
+                timestamp: new Date().toLocaleString()
+            };
+            let notes = JSON.parse(localStorage.getItem('notes')) || [];
+            notes.push(note);
+            localStorage.setItem('notes', JSON.stringify(notes));
+            loadNotes();
+            document.getElementById('note').value = '';
+        }
+
+        // Load Notes function
+        function loadNotes() {
+            const notesContainer = document.getElementById('user-notes');
+            notesContainer.innerHTML = '';
+            const notes = JSON.parse(localStorage.getItem('notes')) || [];
+            notes.forEach((note, index) => {
+                const noteElem = document.createElement('div');
+                noteElem.classList.add('note');
+                noteElem.innerHTML = `
+        <p>${note.text}</p>
+        <small>${note.timestamp}</small>
+        <button class="delete-btn" onclick="deleteNote(${index})"><i class="fas fa-trash-alt"></i></button>
+      `;
+                notesContainer.appendChild(noteElem);
+            });
+        }
+
+        // Delete Note function
+        function deleteNote(index) {
+            let notes = JSON.parse(localStorage.getItem('notes')) || [];
+            notes.splice(index, 1);
+            localStorage.setItem('notes', JSON.stringify(notes));
+            loadNotes();
+        }
+
+        // On page load
+        window.onload = function () {
+            if (checkAuth()) {
+                document.getElementById('login-container').style.display = 'none';
+                document.getElementById('notes-container').style.display = 'block';
+                loadNotes();
+            }
+        };
+    </script>
+
+</body>
+
+</html>
